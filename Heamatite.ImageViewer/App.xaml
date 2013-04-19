@@ -1,0 +1,11 @@
+﻿<Application x:Class="Heamatite.ImageViewer.App"
+						 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+						 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+						 >
+		<Application.Resources>
+		<BitmapImage x:Key="DirectoryImage" UriSource="resources/directoryImage.png" />
+		<BitmapImage x:Key="ZipImage" UriSource="resources/ZipImage.png" />
+		<BitmapImage x:Key="DocumentImage" UriSource="resources/document.png" />
+
+	</Application.Resources>
+</Application>
