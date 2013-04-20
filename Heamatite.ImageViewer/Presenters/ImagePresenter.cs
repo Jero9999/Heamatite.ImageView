@@ -40,6 +40,8 @@ namespace Heamatite.View.Presenters
 			_View.FirstImage = FirstImage;
 			_View.LastImage = LastImage;
 			_View.DataContext = null;
+			_View.EnterCommand = () => WindowManager.ShowMainWindow();
+			_View.FullScreenCommand = () => _View.IsFullScreen = !_View.IsFullScreen;
 		}
 
 		private void ViewFullscreenChanged(object sender, EventArgs e)
@@ -88,5 +90,6 @@ namespace Heamatite.View.Presenters
 			_ImageDirectory.SetCurrent(initialFilename);
 			ShowImage(_ImageDirectory.Current());
 		}
+
 	}
 }

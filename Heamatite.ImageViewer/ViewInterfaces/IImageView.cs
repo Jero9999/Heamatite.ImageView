@@ -23,6 +23,9 @@ namespace Heamatite.ViewInterfaces
 		Action NextImage { get; set; }
 
 		object DataContext { get; set; }
+
+		Action FullScreenCommand { get; set; }
+		Action EnterCommand { get; set; }
 	}
 
 }

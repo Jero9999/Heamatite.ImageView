@@ -1,6 +1,7 @@
 ﻿using Heamatite.IO;
 using Heamatite.ViewInterfaces;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -18,8 +19,6 @@ namespace Heamatite.View
 		public ImageView()
 		{
 			InitializeComponent();
-			
-			this.KeyDown += ImageView_KeyDown;
 		}
 
 		public event EventHandler FullScreenChanged;
@@ -53,51 +52,45 @@ namespace Heamatite.View
 			}
 		}
 
-		void ImageView_KeyDown(object sender, KeyEventArgs e)
-		{
-			//TODO
-			switch (e.Key)
-			{
-				case Key.Home:
-					FirstImage();
-					break;
-				case Key.End:
-					LastImage();
-					break;
-				case Key.Enter:
-					WindowManager.ShowMainWindow();
-					return;
-				case Key.F:
-					IsFullScreen = !IsFullScreen;
-					break;
-			}
-		}
-
 		public Action FirstImage { get; set; }
 		public Action LastImage { get; set; }
 		public Action PreviousImage { get; set; }
 		public Action NextImage { get; set; }
+		public Action FullScreenCommand { get; set; }
+		public Action EnterCommand { get; set; }
 
-		private void BrowseForwardExecuted(object sender, ExecutedRoutedEventArgs e)
+		private void BrowseCommandExecuted(object sender, ExecutedRoutedEventArgs e)
 		{
-			NextImage();
+			RoutedUICommand command = e.Command as RoutedUICommand;
+			if (command == null) return;
+			switch (command.Text)
+			{
+				case "Forward":
+					NextImage();
+					break;
+				case "Back":
+					PreviousImage();
+					break;
+				case "First Page":
+					FirstImage();
+					break;
+				case "Last Page":
+					LastImage();
+					break;
+				default:
+					break;
+			}
 		}
 
-		private void BrowseForwardCanExecuted(object sender, CanExecuteRoutedEventArgs e)
+		private void SwitchWindow_Executed(object sender, ExecutedRoutedEventArgs e)
 		{
-			e.CanExecute = true;
+			EnterCommand();
 		}
 
-		private void BrowseBackExecuted(object sender, ExecutedRoutedEventArgs e)
+		private void ToggleFullScreen_Executed(object sender, ExecutedRoutedEventArgs e)
 		{
-			PreviousImage();
+			FullScreenCommand();
 		}
-
-		private void BrowseBackCanExecuted(object sender, CanExecuteRoutedEventArgs e)
-		{
-			e.CanExecute = true;
-		}
-
-
 	}
+
 }
