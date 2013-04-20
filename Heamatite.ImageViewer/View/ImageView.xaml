@@ -2,6 +2,25 @@
 				xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 				xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 				Title="ImageView" Height="300" Width="300" Background="Black">
+	<Window.InputBindings>
+		<KeyBinding Key="Right" Command="NavigationCommands.BrowseForward" />
+		<KeyBinding Key="Space" Command="NavigationCommands.BrowseForward" />
+		<KeyBinding Key="PageDown" Command="NavigationCommands.BrowseForward" />
+		<KeyBinding Key="Down" Command="NavigationCommands.BrowseForward" />
+
+		<KeyBinding Key="Left" Command="NavigationCommands.BrowseBack" />
+		<KeyBinding Key="Back" Command="NavigationCommands.BrowseBack" />
+		<KeyBinding Key="PageUp" Command="NavigationCommands.BrowseBack" />
+		<KeyBinding Key="Up" Command="NavigationCommands.BrowseBack" />
+	</Window.InputBindings>
+	<Window.CommandBindings>
+		<CommandBinding Command="NavigationCommands.BrowseForward" 
+										Executed="BrowseForwardExecuted" 
+										CanExecute="BrowseForwardCanExecuted"/>
+		<CommandBinding Command="NavigationCommands.BrowseBack" 
+										Executed="BrowseBackExecuted" 
+										CanExecute="BrowseBackCanExecuted"/>
+	</Window.CommandBindings>
 		<Grid>
 		<Image Name="Image" HorizontalAlignment="Center" Margin="10,10,0,0" VerticalAlignment="Top" Source="{Binding Bitmap}" />
 

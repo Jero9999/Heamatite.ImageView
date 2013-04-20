@@ -30,6 +30,8 @@ namespace Heamatite.View.Presenters
 
 		private void SetupView()
 		{
+			_View.SizeChanged += ViewSizeChanged;
+			_View.FullScreenChanged += ViewFullscreenChanged;
 			_View.IsFullScreen = _Config.ImageViewFullScreen;
 			_View.Width = _Config.ImageViewWidth;
 			_View.Height = _Config.ImageViewHeight;
@@ -38,6 +40,17 @@ namespace Heamatite.View.Presenters
 			_View.FirstImage = FirstImage;
 			_View.LastImage = LastImage;
 			_View.DataContext = null;
+		}
+
+		private void ViewFullscreenChanged(object sender, EventArgs e)
+		{
+			_Config.ImageViewFullScreen = _View.IsFullScreen;
+		}
+
+		void ViewSizeChanged(object sender, System.Windows.SizeChangedEventArgs e)
+		{
+			_Config.ImageViewHeight = (int)e.NewSize.Height;
+			_Config.ImageViewWidth = (int)e.NewSize.Width;
 		}
 
 		private void FirstImage()

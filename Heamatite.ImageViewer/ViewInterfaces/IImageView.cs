@@ -14,6 +14,9 @@ namespace Heamatite.ViewInterfaces
 		double Height { set; }
 		bool IsFullScreen { get; set; }
 
+		event SizeChangedEventHandler SizeChanged;
+		event EventHandler FullScreenChanged;
+
 		Action FirstImage { get; set; }
 		Action LastImage { get; set; }
 		Action PreviousImage { get; set; }

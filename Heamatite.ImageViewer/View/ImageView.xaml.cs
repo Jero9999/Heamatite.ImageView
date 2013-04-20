@@ -22,6 +22,7 @@ namespace Heamatite.View
 			this.KeyDown += ImageView_KeyDown;
 		}
 
+		public event EventHandler FullScreenChanged;
 		public bool IsFullScreen
 		{
 			get
@@ -40,6 +41,15 @@ namespace Heamatite.View
 					this.WindowStyle = System.Windows.WindowStyle.SingleBorderWindow;
 					this.WindowState = System.Windows.WindowState.Normal;
 				}
+				OnFullScreenChanged();
+			}
+		}
+
+		protected void OnFullScreenChanged()
+		{
+			if (FullScreenChanged != null)
+			{
+				FullScreenChanged(this, new EventArgs());
 			}
 		}
 
@@ -48,18 +58,6 @@ namespace Heamatite.View
 			//TODO
 			switch (e.Key)
 			{
-				case Key.Space:
-				case Key.Right:
-				case Key.Down:
-				case Key.PageDown:
-					NextImage();
-					break;
-				case Key.Back:
-				case Key.Up:
-				case Key.Left:
-				case Key.PageUp:
-					PreviousImage();
-					break;
 				case Key.Home:
 					FirstImage();
 					break;
@@ -79,6 +77,26 @@ namespace Heamatite.View
 		public Action LastImage { get; set; }
 		public Action PreviousImage { get; set; }
 		public Action NextImage { get; set; }
+
+		private void BrowseForwardExecuted(object sender, ExecutedRoutedEventArgs e)
+		{
+			NextImage();
+		}
+
+		private void BrowseForwardCanExecuted(object sender, CanExecuteRoutedEventArgs e)
+		{
+			e.CanExecute = true;
+		}
+
+		private void BrowseBackExecuted(object sender, ExecutedRoutedEventArgs e)
+		{
+			PreviousImage();
+		}
+
+		private void BrowseBackCanExecuted(object sender, CanExecuteRoutedEventArgs e)
+		{
+			e.CanExecute = true;
+		}
 
 
 	}
