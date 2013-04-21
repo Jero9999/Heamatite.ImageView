@@ -1,4 +1,5 @@
 ﻿using Heamatite.IO;
+using Heamatite.IoSystem;
 using Heamatite.View.Presenters;
 using System;
 using System.Collections.Generic;
@@ -35,11 +36,11 @@ namespace Heamatite.View
 		}
 
 		private IConfiguration Config;
-		private FileRepository FileRepository;
+		private IIoRepository FileRepository;
 		public WindowManager()
 		{
 			Config = new Configuration1();
-			FileRepository = new FileRepository();
+			FileRepository = new IoRepository();
 		}
 
 		public static void ShowImageWindow(ImageDirectory currentDirectory = null, string initialFilename = null)
@@ -58,7 +59,6 @@ namespace Heamatite.View
 			get
 			{
 				if (_MainWindow == null) { 
-					
 					_MainWindow = new MainWindow();
 					_MainPresenter = new MainPresenter(_MainWindow, Config, FileRepository);
 				}

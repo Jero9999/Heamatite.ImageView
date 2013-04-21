@@ -20,6 +20,7 @@ using System.Xml.Serialization;
 namespace Heamatite.View
 {
 	using Heamatite.IO;
+	using Heamatite.IoSystem;
 	using Heamatite.ViewInterfaces;
 
 	/// <summary>
@@ -111,17 +112,18 @@ namespace Heamatite.View
 	{
 		public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
 		{
-			Io obj = value as Io;
+			IFileSystemObject obj = value as IFileSystemObject;
 			if (obj == null)
 			{
 				return null;
 			}
 			object image = null;
-			if (obj.IoType.HasFlag(IoType.Zip))
-			{
-				image = Heamatite.ImageViewer.App.Current.FindResource("ZipImage");
-			}
-			else if (obj.IoType.HasFlag(IoType.Directory))
+			//if (obj.IoType.HasFlag(IoType.Zip))
+			//{
+			//	image = Heamatite.ImageViewer.App.Current.FindResource("ZipImage");
+			//}
+			//else 
+			if (obj is IDirectoryObject)
 			{
 				image = Heamatite.ImageViewer.App.Current.FindResource("DirectoryImage");
 			}

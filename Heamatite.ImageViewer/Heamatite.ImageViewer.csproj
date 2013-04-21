@@ -96,14 +96,11 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="View\RelayCommand.cs" />
     <Compile Include="View\WindowManager.cs" />
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="IO\FileRepository.cs" />
-    <Compile Include="IO\Io.cs" />
     <Compile Include="Main.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -173,6 +170,12 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\document.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Heamatite.IoSystem\Heamatite.IoSystem.csproj">
+      <Project>{855e8eb1-5b4f-453a-aff9-3b62824b71dc}</Project>
+      <Name>Heamatite.IoSystem</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -5,36 +5,36 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Configuration;
 using Heamatite.View;
-using Heamatite.IO;
+//using Heamatite.IO;
 
 namespace Heamatite.View.Presenters
 {
 	using Heamatite.ViewInterfaces;
+	using Heamatite.IoSystem;
+	using Heamatite.IO;
 
 	public class MainPresenter
 	{
 		private IMainView _View;
 		IConfiguration _Config;
-		FileRepository _Repo;
+		IIoRepository _Repo;
+		IDirectoryObject _CurrentDirectory;
 
-		public MainPresenter(IMainView view, IConfiguration config, FileRepository repository)
+		public MainPresenter(IMainView view, IConfiguration config, IIoRepository repository)
 		{
 			_View = view;
 			_Config = config;
 			_Repo = repository;
 
-
 			string currentDirectory = _Config.StartupDirectory??@"C:\";
-			_Repo.Location = currentDirectory;
-			
+			_CurrentDirectory = _Repo.GetDirectory(currentDirectory);
 			SetupView(currentDirectory);
 		}
 
 		private void SetupView(string currentDirectory)
 		{
 			_View.SizeChanged += ViewSizeChanged;
-			_View.DataContext = _Repo.GetContainerList();
-			_View.CurrentDirectory = currentDirectory;
+			_View.DataContext = new MainWindowDirectoryWrapper(_CurrentDirectory);
 			_View.Width = _Config.MainViewWidth;
 			_View.Height = _Config.MainViewHeight;
 			_View.UpdateFileList = UpdateFileList;
@@ -53,23 +53,24 @@ namespace Heamatite.View.Presenters
 
 		private void UpdateFileList()
 		{
-			_View.DataContext = _Repo.GetContainerList();
-			_Config.StartupDirectory = _Repo.Location;
+			_View.DataContext = new MainWindowDirectoryWrapper(_CurrentDirectory);
+			_Config.StartupDirectory = _CurrentDirectory.FullName;
 		}
 
 		private void GotoSelectedItem(object selectedItem)
 		{
-			Io selected = selectedItem as Io;
+			IFileSystemObject selected = selectedItem as IFileSystemObject;
 			if (selected == null) return;
-			if (selected.IoType.HasFlag(IoType.Directory))
+			if (selected is IDirectoryObject)
 			{
-				_Repo.Location = _View.CurrentDirectory = selected.FullName;
+				_CurrentDirectory = selected as IDirectoryObject;
 				UpdateFileList();
 			}
-			else if (selected.IoType.HasFlag(IoType.File) && selected.IoType.HasFlag(IoType.Image))
+			else
 			{
-				var dir = System.IO.Path.GetDirectoryName(selected.FullName);
-				WindowManager.ShowImageWindow(new ImageDirectory(dir), System.IO.Path.GetFileName(selected.FullName));
+				IFileObject file = selected as IFileObject;
+				IDirectoryObject dir = file.ParentDirectory;
+				WindowManager.ShowImageWindow(new ImageDirectory(dir), file.Name);
 			}
 		}
 
@@ -86,14 +87,37 @@ namespace Heamatite.View.Presenters
 
 		private void MoveToParent()
 		{
-			_Repo.MoveToParent();
+			_CurrentDirectory = _CurrentDirectory.ParentDirectory;
 			UpdateFileList();
 		}
 
 		private void CurrentDirectoryEnter()
 		{
-			_Repo.Location = _View.CurrentDirectory;
+			_CurrentDirectory = _Repo.GetDirectory( _View.CurrentDirectory);
 			UpdateFileList();
+		}
+	}
+
+	class MainWindowDirectoryWrapper
+	{
+		IDirectoryObject _DirectoryObject;
+		public MainWindowDirectoryWrapper(IDirectoryObject directoryObject)
+		{
+			_DirectoryObject = directoryObject;
+		}
+
+		public IList<IFileSystemObject> Contents
+		{
+			get
+			{
+				return _DirectoryObject.GetContents();
+			}
+		}
+
+		public string FullName
+		{
+			get { return _DirectoryObject.FullName; }
+			set { }
 		}
 	}
 }

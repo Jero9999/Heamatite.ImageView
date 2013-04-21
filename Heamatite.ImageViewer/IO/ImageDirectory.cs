@@ -1,6 +1,7 @@
-﻿using System;
+﻿using Heamatite.IoSystem;
+using System;
 using System.Collections.Generic;
-using System.IO;
+
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,36 +18,43 @@ namespace Heamatite.IO
 		IImageFile Last();
 
 		void SetCurrent(string fileName);
+
+		string FullName { get; set; }
+		IList<object> Contents { get; set; }
 	}
 
 	public interface IImageFile
 	{
-		Stream GetStream();
+		System.IO.Stream GetStream();
 
 		string Name { get; }
-
-		bool IsImage { get; }
 
 		BitmapImage Bitmap { get; }
 	}
 
 	public class ImageDirectory : IImageDirectory
 	{
-		Directory Directory;
-		File[] Files;
+		IDirectoryObject Directory;
+		IFileObject[] Files;
 		private int FileIndex;
 
-		public ImageDirectory(string directoryPath)
-			: this(new Directory(directoryPath))
-		{
-		}
-
-		public ImageDirectory(Directory directory)
+		public ImageDirectory(IDirectoryObject directory)
 		{
 			Directory = directory;
-			IoType imageFileType = IoType.File | IoType.Image;
-			Files = directory.GetFiles().Where(c=>(c.IoType & imageFileType) == imageFileType ).Cast<File>().ToArray();
+			Files = directory.GetFiles().Where(c => IsImage(c)).Cast<IFileObject>().ToArray();
 			FileIndex = 0;
+		}
+
+		private static string[] _ImageFileExtensions = new string[]
+		{
+			".jpg",
+			".gif",
+			".png"
+		};
+
+		private static bool IsImage(IFileObject file)
+		{
+			return _ImageFileExtensions.Contains(file.Extension);
 		}
 
 		public IImageFile Next()
@@ -65,7 +73,7 @@ namespace Heamatite.IO
 
 		public IImageFile Current()
 		{
-			File file = Files[FileIndex];
+			IFileObject file = Files[FileIndex];
 			return new ImageFile(file);
 		}
 
@@ -86,11 +94,8 @@ namespace Heamatite.IO
 			bool foundGoodImage = false;
 			for (int i = FileIndex; i < Files.Length; i++)
 			{
-				IImageFile currentFile = Current();
-				if (!currentFile.IsImage)
-				{
-					continue;
-				}
+				IFileObject currentFile = Files[FileIndex];
+				if (!IsImage(currentFile)) { continue; }
 				foundGoodImage = true;
 				FileIndex = i;
 			}
@@ -102,11 +107,8 @@ namespace Heamatite.IO
 			bool foundGoodImage = false;
 			for (int i = FileIndex; i >= 0; i++)
 			{
-				IImageFile currentFile = Current();
-				if (!currentFile.IsImage)
-				{
-					continue;
-				}
+				IFileObject currentFile = Files[FileIndex];
+				if (!IsImage(currentFile)) { continue; }
 				foundGoodImage = true;
 				FileIndex = i;
 			}
@@ -124,18 +126,31 @@ namespace Heamatite.IO
 				}
 			}
 		}
+
+
+		public string FullName
+		{
+			get { return this.Directory.FullName; }
+			set { }
+		}
+
+		public IList<object> Contents
+		{
+			get { return this.Directory.Contents.Cast<object>().ToList(); }
+			set { }
+		}
 	}
 
 	class ImageFile : IImageFile
 	{
-		private File File;
+		private IFileObject File;
 
-		public ImageFile(File file)
+		public ImageFile(IFileObject file)
 		{
 			File = file;
 		}
 
-		public Stream GetStream()
+		public System.IO.Stream GetStream()
 		{
 			return File.OpenRead();
 		}
@@ -156,7 +171,7 @@ namespace Heamatite.IO
 			}
 		}
 
-		private static BitmapImage GetBitmap(Stream fileSteam)
+		private static BitmapImage GetBitmap(System.IO.Stream fileSteam)
 		{
 			BitmapImage myBitmapImage = new BitmapImage();
 
@@ -167,14 +182,6 @@ namespace Heamatite.IO
 
 			myBitmapImage.EndInit();
 			return myBitmapImage;
-		}
-
-		public bool IsImage
-		{
-			get
-			{
-				return File.IoType.HasFlag(IoType.Image);
-			}
 		}
 	}
 }
