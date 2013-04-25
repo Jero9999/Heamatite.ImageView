@@ -127,7 +127,6 @@ namespace Heamatite.IO
 			}
 		}
 
-
 		public string FullName
 		{
 			get { return this.Directory.FullName; }
@@ -136,7 +135,7 @@ namespace Heamatite.IO
 
 		public IList<object> Contents
 		{
-			get { return this.Directory.Contents.Cast<object>().ToList(); }
+			get { return this.Directory.GetContents().Cast<object>().ToList(); }
 			set { }
 		}
 	}

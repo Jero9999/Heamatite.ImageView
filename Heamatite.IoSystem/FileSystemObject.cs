@@ -64,10 +64,6 @@ namespace Heamatite.IoSystem
 			return _Repository.GetContents(this.FullName).Where(c => c is IFileObject).Cast<IFileObject>().ToList();
 		}
 
-		public IList<IFileSystemObject> Contents
-		{
-			get { return _Repository.GetContents(this.FullName); }
-		}
 	}
 
 	class FileObject : FileSystemObject, IFileObject
