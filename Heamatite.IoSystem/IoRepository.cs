@@ -25,13 +25,22 @@ namespace Heamatite.IoSystem
 			}
 			else
 			{
+				if (Ionic.Zip.ZipFile.IsZipFile(systemObject.FullName))
+				{
+					return (IFileSystemObject)new Zip.ZipFileObject(systemObject as FileInfo, this);
+				}
 				return (IFileSystemObject)new FileObject(systemObject as FileInfo, this);
 			}
 		}
 
 		public IDirectoryObject GetDirectory(string currentDirectory)
 		{
-			var directoryInfo = new DirectoryInfo(currentDirectory);
+			//TODO this is nasty. Create a directory. if we find it's not actually a directory create a file? bleh
+			FileSystemInfo directoryInfo = new DirectoryInfo(currentDirectory);
+			if (!directoryInfo.Attributes.HasFlag(FileAttributes.Directory))
+			{
+				directoryInfo = new FileInfo(currentDirectory);
+			}
 			return Create(directoryInfo) as IDirectoryObject;
 		}
 	}
