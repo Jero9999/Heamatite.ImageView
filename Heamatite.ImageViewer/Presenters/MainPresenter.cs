@@ -12,6 +12,8 @@ namespace Heamatite.View.Presenters
 	using Heamatite.ViewInterfaces;
 	using Heamatite.IoSystem;
 	using Heamatite.IO;
+	using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 	public class MainPresenter
 	{
@@ -98,7 +100,7 @@ namespace Heamatite.View.Presenters
 		}
 	}
 
-	class MainWindowDirectoryWrapper
+	class MainWindowDirectoryWrapper: INotifyPropertyChanged
 	{
 		IDirectoryObject _DirectoryObject;
 		public MainWindowDirectoryWrapper(IDirectoryObject directoryObject)
@@ -106,18 +108,48 @@ namespace Heamatite.View.Presenters
 			_DirectoryObject = directoryObject;
 		}
 
+		private IList<IFileSystemObject> _Contents = null;
 		public IList<IFileSystemObject> Contents
 		{
 			get
 			{
-				return _DirectoryObject.GetContents();
+				if (_Contents == null)
+				{
+					SetContents();
+				}
+				return _Contents;
 			}
+		}
+
+		private Task SetContentsTask = null;
+		private void SetContents()
+		{
+			_Contents = new List<IFileSystemObject>();
+			//TODO need to work out how to cancel this if 'this' is disposed / released before the task completes
+			SetContentsTask = Task.Run(() =>
+			{
+				_Contents = _DirectoryObject.GetContents();
+				NotifyPropertyChanged("Contents");
+			});
+			
 		}
 
 		public string FullName
 		{
 			get { return _DirectoryObject.FullName; }
 			set { }
+		}
+
+		public event PropertyChangedEventHandler PropertyChanged;
+
+		protected void NotifyPropertyChanged([CallerMemberName] string propertyName = null)
+		{
+			if (propertyName == null) return;
+
+			if (PropertyChanged != null)
+			{
+				PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+			}
 		}
 	}
 }
