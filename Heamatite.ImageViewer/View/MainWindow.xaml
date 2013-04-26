@@ -3,15 +3,70 @@
 				xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 				Title="MainWindow" Height="350" Width="525"
 				xmlns:local="clr-namespace:Heamatite.View"
+				KeyDown="Window_KeyDown"
 				
 				>
 	<Window.Resources>
 		<local:ImageSelectorConverter x:Key="ImageSelector"/>
+
+		<Style TargetType="ListBoxItem">
+			<Setter Property="Template">
+				<Setter.Value>
+					<ControlTemplate TargetType="ListBoxItem">
+						<Border Name="RootElement">
+							<VisualStateManager.VisualStateGroups>
+								<VisualStateGroup Name="FocusStates">
+									<VisualState Name="Unfocused" >
+										<Storyboard>
+											<ColorAnimation Storyboard.TargetName="BorderBrush"  
+																			Duration="0:0:0.15"
+																			Storyboard.TargetProperty="Color" 
+																			To="{TemplateBinding Background}" />
+
+											<DoubleAnimation Storyboard.TargetName="BorderBrush" 
+																			 Storyboard.TargetProperty="Opacity"
+																			 Duration="0:0:0.15"
+																			 To="{TemplateBinding Opacity}"/>
+										</Storyboard>
+									</VisualState>
+
+									<VisualState Name="Focused">
+										<Storyboard>
+											<ColorAnimation Storyboard.TargetName="BorderBrush"  
+																			Duration="0:0:0.15"
+																			Storyboard.TargetProperty="Color" 
+																			To="Blue" />
+
+											<DoubleAnimation Storyboard.TargetName="BorderBrush" 
+																			 Storyboard.TargetProperty="Opacity"
+																			 Duration="0:0:0.15"
+																			 To="0.5"/>
+										</Storyboard>
+									</VisualState>
+								</VisualStateGroup>
+							</VisualStateManager.VisualStateGroups>
+							<Border.Background>
+								<SolidColorBrush x:Name="BorderBrush" 
+																 Opacity="{TemplateBinding Opacity}" 
+																 Color="{TemplateBinding Background}"/>
+							</Border.Background>
+
+							<Grid>
+								<ContentPresenter
+									HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+									VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+									Margin="4,5,4,4" />
+							</Grid>
+						</Border>
+					</ControlTemplate>
+				</Setter.Value>
+			</Setter>
+		</Style>
 	</Window.Resources>
 	<DockPanel Margin="0,0,0,0" >
 		<DockPanel Margin="2,2,2,2" DockPanel.Dock="Top">
-		<Label Content="Current directory:"/>
-		<TextBox VerticalAlignment="Stretch" Text="{Binding FullName}" x:Name="CurrentDirectoryControl" KeyDown="CurrentDirectory_KeyDown"></TextBox>
+			<Label Content="Current directory:"/>
+			<TextBox VerticalAlignment="Stretch" Text="{Binding FullName}" x:Name="CurrentDirectoryControl" KeyDown="CurrentDirectory_KeyDown"></TextBox>
 		</DockPanel>
 		<ListBox  Margin="2,2,2,2" x:Name="DirectoryList" ScrollViewer.HorizontalScrollBarVisibility="Disabled" 
 							MouseDoubleClick="DirectoryList_MouseDoubleClick" 
@@ -26,8 +81,7 @@
 				<DataTemplate>
 					<DockPanel Name="DirectoryListItem" Width="150" Height="150" >
 						<Image Source="{Binding Converter={StaticResource ImageSelector}}"  Height="100" Stretch="Uniform" DockPanel.Dock="Top" />
-						<!--<Image Source="{StaticResource DirectoryImage}"  HorizontalAlignment="Center" Height="100" Stretch="Uniform" DockPanel.Dock="Top" />-->
-						<Label FontFamily="Tahoma" HorizontalAlignment="Center" FontSize="15" Content="{Binding Name}" DockPanel.Dock="Bottom" />
+						<TextBlock TextWrapping="Wrap" FontFamily="Tahoma" HorizontalAlignment="Center" FontSize="15" Text="{Binding Name}" DockPanel.Dock="Bottom" />
 					</DockPanel>
 				</DataTemplate>
 			</ListBox.ItemTemplate>

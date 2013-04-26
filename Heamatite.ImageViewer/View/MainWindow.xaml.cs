@@ -35,12 +35,18 @@ namespace Heamatite.View
 
 			DirectoryList.SelectedIndex = 0;
 			DirectoryList.Focus();
+			this.BorderThickness = new Thickness(0);
+			this.WindowStyle = System.Windows.WindowStyle.None;
 		}
 
 		public string CurrentDirectory
 		{
 			get { return CurrentDirectoryControl.Text; }
 			set { CurrentDirectoryControl.Text = value; }
+		}
+
+		private void Window_KeyDown(object sender, KeyEventArgs e)
+		{
 		}
 
 		#endregion
@@ -106,6 +112,7 @@ namespace Heamatite.View
 			listBoxItem.Focus();
 		}
 		#endregion
+
 	}
 
 	public class ImageSelectorConverter : IValueConverter
