@@ -12,7 +12,7 @@ namespace Heamatite.IoSystem.Zip
 
 	internal abstract class ZipEntryObject : IFileSystemObject
 	{
-		ZipEntry _ZipEntry;
+		protected ZipEntry _ZipEntry;
 		public ZipEntryObject(ZipEntry zipEntry)
 		{
 			_ZipEntry = zipEntry;

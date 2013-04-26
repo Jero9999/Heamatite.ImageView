@@ -27,7 +27,7 @@ namespace Heamatite.IoSystem.Zip
 			return _ZipFile.Entries.Select(c => 
 				c.IsDirectory ? 
 				(IFileSystemObject)new ZipEntryDirectoryObject(c, _ZipFile) : 
-				(IFileSystemObject)new ZipEntryFileObject(c))
+				(IFileSystemObject)new ZipEntryFileObject(c, this))
 				.ToList();
 		}
 

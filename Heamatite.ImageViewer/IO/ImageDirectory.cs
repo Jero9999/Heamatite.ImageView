@@ -159,17 +159,23 @@ namespace Heamatite.IO
 			get { return File.Name; }
 		}
 
+		private BitmapImage _Bitmap = null;
 		public BitmapImage Bitmap
 		{
 			get
 			{
-				using (var stream = GetStream())
-				{
-					return GetBitmap(stream);
-				}
+				if (_Bitmap == null) { _Bitmap = GenerateBitmap(); }
+				return _Bitmap;
 			}
 		}
 
+		private BitmapImage GenerateBitmap()
+		{
+			using (var stream = GetStream())
+			{
+				return GetBitmap(stream);
+			}
+		}
 		private static BitmapImage GetBitmap(System.IO.Stream fileSteam)
 		{
 			BitmapImage myBitmapImage = new BitmapImage();
