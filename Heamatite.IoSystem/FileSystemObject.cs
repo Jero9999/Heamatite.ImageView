@@ -34,7 +34,7 @@ namespace Heamatite.IoSystem
 			get
 			{
 				string parentDirectory = System.IO.Path.GetDirectoryName(this.FullName);
-				return _Repository.GetDirectory(parentDirectory);
+				return parentDirectory== null? null: _Repository.GetDirectory(parentDirectory);
 			}
 		}
 	}

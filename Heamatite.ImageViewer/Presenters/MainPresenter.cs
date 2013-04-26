@@ -89,8 +89,12 @@ using System.Runtime.CompilerServices;
 
 		private void MoveToParent()
 		{
-			_CurrentDirectory = _CurrentDirectory.ParentDirectory;
-			UpdateFileList();
+			var currentDirectory = _CurrentDirectory.ParentDirectory;
+			if (currentDirectory != null)
+			{
+				_CurrentDirectory = currentDirectory;
+				UpdateFileList();
+			}
 		}
 
 		private void CurrentDirectoryEnter()
