@@ -7,9 +7,8 @@
 				
 				>
 	<Window.Resources>
-		<local:ImageSelectorConverter x:Key="ImageSelector"/>
 
-		<Style TargetType="ListBoxItem">
+		<Style x:Key="ListBoxItemStyleBase" TargetType="ListBoxItem">
 			<Setter Property="Template">
 				<Setter.Value>
 					<ControlTemplate TargetType="ListBoxItem">
@@ -70,14 +69,19 @@
 		</DockPanel>
 		<ListBox  Margin="2,2,2,2" x:Name="DirectoryList" ScrollViewer.HorizontalScrollBarVisibility="Disabled" 
 							MouseDoubleClick="DirectoryList_MouseDoubleClick" 
-							KeyDown="DirectoryList_KeyDown" DockPanel.Dock="Bottom" ItemsSource="{Binding Contents}" 
+							KeyDown="DirectoryList_KeyDown" DockPanel.Dock="Bottom" ItemsSource="{Binding ContentsAsync}" 
 							SelectionChanged="DirectoryList_SelectionChanged">
 			<ListBox.ItemsPanel>
 				<ItemsPanelTemplate>
 					<WrapPanel></WrapPanel>
 				</ItemsPanelTemplate>
 			</ListBox.ItemsPanel>
-			<ListBox.ItemTemplate>
+			<ListBox.ItemContainerStyle>
+				<Style TargetType="ListBoxItem" BasedOn="{StaticResource ListBoxItemStyleBase}">
+					<Setter Property="IsSelected" Value="{Binding Selected}"/>
+				</Style>
+			</ListBox.ItemContainerStyle>
+				<ListBox.ItemTemplate>
 				<DataTemplate>
 					<DockPanel Name="DirectoryListItem" Width="150" Height="150" >
 						<Image Source="{Binding Icon}"  Height="100" Stretch="Uniform" DockPanel.Dock="Top" />

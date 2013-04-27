@@ -38,6 +38,6 @@
 		<CommandBinding Command="{StaticResource ToggleFullScreen}" Executed="ToggleFullScreen_Executed"/>
 	</Window.CommandBindings>
 	<Grid>
-		<Image Name="Image" HorizontalAlignment="Center" Margin="10,10,0,0" VerticalAlignment="Top" Source="{Binding Bitmap}" />
+		<Image Name="Image" Stretch="Uniform" HorizontalAlignment="Center" Margin="10,10,0,0" VerticalAlignment="Top" Source="{Binding Bitmap}" />
 	</Grid>
 </Window>

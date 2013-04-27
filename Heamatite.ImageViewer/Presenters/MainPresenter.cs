@@ -1,20 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Configuration;
-using Heamatite.View;
-//using Heamatite.IO;
-
+﻿
 namespace Heamatite.View.Presenters
 {
-	using Heamatite.ViewInterfaces;
-	using Heamatite.IoSystem;
+	using System;
 	using Heamatite.IO;
-	using System.ComponentModel;
-using System.Runtime.CompilerServices;
-
+	using Heamatite.IoSystem;
+	using Heamatite.ViewInterfaces;
+	using System.IO;
+	using System.Threading.Tasks;
+	using System.Linq;
 	public class MainPresenter
 	{
 		private IMainView _View;
@@ -28,15 +21,29 @@ using System.Runtime.CompilerServices;
 			_Config = config;
 			_Repo = repository;
 
-			string currentDirectory = _Config.StartupDirectory??@"C:\";
+
+			string currentDirectory = _Config.StartupDirectory ?? Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
 			_CurrentDirectory = _Repo.GetDirectory(currentDirectory);
 			SetupView(currentDirectory);
+		}
+
+		//need this so that code running a thread other than the UI thread has access to the window's DataContext.
+		MainWindowDirectoryWrapper _DataContext;
+		MainWindowDirectoryWrapper DataContext
+		{
+			get
+			{
+				return _DataContext;
+			}
+			set
+			{
+				_View.DataContext = _DataContext = value;
+			}
 		}
 
 		private void SetupView(string currentDirectory)
 		{
 			_View.SizeChanged += ViewSizeChanged;
-			_View.DataContext = new MainWindowDirectoryWrapper(_CurrentDirectory);
 			_View.Width = _Config.MainViewWidth;
 			_View.Height = _Config.MainViewHeight;
 			_View.UpdateFileList = UpdateFileList;
@@ -45,6 +52,9 @@ using System.Runtime.CompilerServices;
 			_View.MoveLeft = MoveLeft;
 			_View.MoveToParent = MoveToParent;
 			_View.CurrentDirectoryEnter = CurrentDirectoryEnter;
+
+			DataContext = new MainWindowDirectoryWrapper(_CurrentDirectory);
+
 		}
 
 		void ViewSizeChanged(object sender, System.Windows.SizeChangedEventArgs e)
@@ -55,8 +65,15 @@ using System.Runtime.CompilerServices;
 
 		private void UpdateFileList()
 		{
-			_View.DataContext = new MainWindowDirectoryWrapper(_CurrentDirectory);
+			DataContext = new MainWindowDirectoryWrapper(_CurrentDirectory);
 			_Config.StartupDirectory = _CurrentDirectory.FullName;
+		}
+
+		private void SetSelectedItemInList(IFileSystemObject fileSystemObject)
+		{
+			var itemToSelect = DataContext.Contents.FirstOrDefault(c => c.SystemObject.Name == fileSystemObject.Name);
+			if (itemToSelect == null) return;
+			itemToSelect.Selected = true;
 		}
 
 		private void GotoSelectedItem(object selectedItem)
@@ -93,14 +110,16 @@ using System.Runtime.CompilerServices;
 			var currentDirectory = _CurrentDirectory.ParentDirectory;
 			if (currentDirectory != null)
 			{
+				var prevDirectory = _CurrentDirectory;
 				_CurrentDirectory = currentDirectory;
 				UpdateFileList();
+				SetSelectedItemInList(prevDirectory);
 			}
 		}
 
 		private void CurrentDirectoryEnter()
 		{
-			_CurrentDirectory = _Repo.GetDirectory( _View.CurrentDirectory);
+			_CurrentDirectory = _Repo.GetDirectory(_View.CurrentDirectory);
 			UpdateFileList();
 		}
 	}

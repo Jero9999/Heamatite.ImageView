@@ -20,27 +20,51 @@ namespace Heamatite.IO
 			_DirectoryObject = directoryObject;
 		}
 
-		private IList<MainWindowFile> _Contents = null;
+		private object _ContentsLocker = new Object();
+
+		private IList<MainWindowFile> _ContentsInternal = null;
+		private IList<MainWindowFile> ContentsInternal
+		{
+			get
+			{
+				lock (_ContentsLocker) { return _ContentsInternal; }
+			}
+			set
+			{
+				lock (_ContentsLocker) { _ContentsInternal = value; }
+			}
+		}
+
+		public IList<MainWindowFile> ContentsAsync
+		{
+			get
+			{
+				if (ContentsInternal == null) { SetContents(); }
+				return ContentsInternal;
+			}
+		}
+
 		public IList<MainWindowFile> Contents
 		{
 			get
 			{
-				if (_Contents == null)
-				{
-					SetContents();
-				}
-				return _Contents;
+				var theContents = ContentsAsync;
+				if (!SetContentsTask.IsCompleted) SetContentsTask.Wait();
+				return ContentsInternal;
 			}
 		}
 
 		private Task SetContentsTask = null;
 		private void SetContents()
 		{
-			_Contents = new List<MainWindowFile>();
+			ContentsInternal = new List<MainWindowFile>();
 			//TODO need to work out how to cancel this if 'this' is disposed / released before the task completes
 			SetContentsTask = Task.Run(() =>
 			{
-				_Contents = _DirectoryObject.GetContents().Select(c => new MainWindowFile(c)).ToList();
+				ContentsInternal = _DirectoryObject.GetContents().Select(c => new MainWindowFile(c)).ToList();
+				var firstItem = ContentsInternal.FirstOrDefault();
+				if (firstItem != null) { firstItem.Selected = true; }
+				NotifyPropertyChanged("ContentsAsync");
 				NotifyPropertyChanged("Contents");
 			});
 
@@ -76,7 +100,10 @@ namespace Heamatite.IO
 		IFileSystemObject _FileSystemObject;
 		public IFileSystemObject SystemObject { get { return _FileSystemObject; } }
 
-		public string Name { get { return _FileSystemObject.Name; } }
+		public string Name
+		{
+			get { return _FileSystemObject.Name; }
+		}
 
 		public ImageSource Icon
 		{
@@ -94,6 +121,19 @@ namespace Heamatite.IO
 			}
 		}
 
+		private bool _Selected;
+		public bool Selected
+		{
+			get
+			{
+				return _Selected;
+			}
+			set
+			{
+				_Selected = value;
+				NotifyPropertyChanged("Selected");
+			}
+		}
 		private ImageSource _CachedIcon = null;
 		private ImageSource GetIcon()
 		{

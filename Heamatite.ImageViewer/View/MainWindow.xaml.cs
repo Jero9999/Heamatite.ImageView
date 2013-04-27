@@ -33,10 +33,7 @@ namespace Heamatite.View
 		{
 			InitializeComponent();
 
-			DirectoryList.SelectedIndex = 0;
 			DirectoryList.Focus();
-			this.BorderThickness = new Thickness(0);
-			this.WindowStyle = System.Windows.WindowStyle.None;
 		}
 
 		public string CurrentDirectory
@@ -113,38 +110,10 @@ namespace Heamatite.View
 		}
 		#endregion
 
+
+
 	}
 
-	public class ImageSelectorConverter : IValueConverter
-	{
-		public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-		{
-			IFileSystemObject obj = value as IFileSystemObject;
-			if (obj == null)
-			{
-				return null;
-			}
-			object image = null;
-			//if (obj.IoType.HasFlag(IoType.Zip))
-			//{
-			//	image = Heamatite.ImageViewer.App.Current.FindResource("ZipImage");
-			//}
-			//else 
-			if (obj is IDirectoryObject)
-			{
-				image = Heamatite.ImageViewer.App.Current.FindResource("DirectoryImage");
-			}
-			else
-			{
-				image = Heamatite.ImageViewer.App.Current.FindResource("DocumentImage");
-			}
-			return image;
-		}
 
-		public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-		{
-			throw new NotImplementedException("ImageSelectorConverter.ConvertBack");
-		}
-	}
 
 }

@@ -31,7 +31,6 @@ namespace Heamatite
 		public Configuration1()
 		{
 			ConfigSettings = GetRoamingConfiguration(out  Config);
-			if (string.IsNullOrEmpty(StartupDirectory)) { StartupDirectory = @"c:\"; }
 		}
 
 		public string StartupDirectory
@@ -159,10 +158,10 @@ namespace Heamatite
 					currentSection.ImageViewFullScreen = new BoolConfigElement();
 					currentSection.MainViewFullScreen = new BoolConfigElement();
 
-					currentSection.ImageViewHeight = new IntConfigElement();
-					currentSection.ImageViewWidth = new IntConfigElement();
-					currentSection.MainViewHeight = new IntConfigElement();
-					currentSection.MainViewWidth = new IntConfigElement();
+					currentSection.ImageViewHeight = new IntConfigElement() { Value = 800 };
+					currentSection.ImageViewWidth = new IntConfigElement() { Value = 800 };
+					currentSection.MainViewHeight = new IntConfigElement() { Value = 800 };
+					currentSection.MainViewWidth = new IntConfigElement() { Value = 800 };
 
 				}
 				config.Save(ConfigurationSaveMode.Modified);
