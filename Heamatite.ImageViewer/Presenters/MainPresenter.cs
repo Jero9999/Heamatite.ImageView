@@ -61,16 +61,17 @@ using System.Runtime.CompilerServices;
 
 		private void GotoSelectedItem(object selectedItem)
 		{
-			IFileSystemObject selected = selectedItem as IFileSystemObject;
+			MainWindowFile selected = selectedItem as MainWindowFile;
 			if (selected == null) return;
-			if (selected is IDirectoryObject)
+			IFileSystemObject selectedSystemObject = selected.SystemObject;
+			if (selectedSystemObject is IDirectoryObject)
 			{
-				_CurrentDirectory = selected as IDirectoryObject;
+				_CurrentDirectory = selectedSystemObject as IDirectoryObject;
 				UpdateFileList();
 			}
 			else
 			{
-				IFileObject file = selected as IFileObject;
+				IFileObject file = selectedSystemObject as IFileObject;
 				IDirectoryObject dir = file.ParentDirectory;
 				WindowManager.ShowImageWindow(new ImageDirectory(dir), file.Name);
 			}
@@ -104,56 +105,4 @@ using System.Runtime.CompilerServices;
 		}
 	}
 
-	class MainWindowDirectoryWrapper: INotifyPropertyChanged
-	{
-		IDirectoryObject _DirectoryObject;
-		public MainWindowDirectoryWrapper(IDirectoryObject directoryObject)
-		{
-			_DirectoryObject = directoryObject;
-		}
-
-		private IList<IFileSystemObject> _Contents = null;
-		public IList<IFileSystemObject> Contents
-		{
-			get
-			{
-				if (_Contents == null)
-				{
-					SetContents();
-				}
-				return _Contents;
-			}
-		}
-
-		private Task SetContentsTask = null;
-		private void SetContents()
-		{
-			_Contents = new List<IFileSystemObject>();
-			//TODO need to work out how to cancel this if 'this' is disposed / released before the task completes
-			SetContentsTask = Task.Run(() =>
-			{
-				_Contents = _DirectoryObject.GetContents();
-				NotifyPropertyChanged("Contents");
-			});
-			
-		}
-
-		public string FullName
-		{
-			get { return _DirectoryObject.FullName; }
-			set { }
-		}
-
-		public event PropertyChangedEventHandler PropertyChanged;
-
-		protected void NotifyPropertyChanged([CallerMemberName] string propertyName = null)
-		{
-			if (propertyName == null) return;
-
-			if (PropertyChanged != null)
-			{
-				PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-			}
-		}
-	}
 }

@@ -80,7 +80,7 @@
 			<ListBox.ItemTemplate>
 				<DataTemplate>
 					<DockPanel Name="DirectoryListItem" Width="150" Height="150" >
-						<Image Source="{Binding Converter={StaticResource ImageSelector}}"  Height="100" Stretch="Uniform" DockPanel.Dock="Top" />
+						<Image Source="{Binding Icon}"  Height="100" Stretch="Uniform" DockPanel.Dock="Top" />
 						<TextBlock TextWrapping="Wrap" FontFamily="Tahoma" HorizontalAlignment="Center" FontSize="15" Text="{Binding Name}" DockPanel.Dock="Bottom" />
 					</DockPanel>
 				</DataTemplate>

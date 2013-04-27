@@ -52,7 +52,7 @@ namespace Heamatite.IO
 			".png"
 		};
 
-		private static bool IsImage(IFileObject file)
+		public static bool IsImage(IFileObject file)
 		{
 			return _ImageFileExtensions.Contains(file.Extension);
 		}

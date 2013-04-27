@@ -48,7 +48,9 @@ namespace Heamatite.View
 			var dummy = Instance.ImageWindow;
 			Instance._ImagePresenter.ResetImage(currentDirectory, initialFilename);
 			Instance.ImageWindow.Show();
-			Instance.MainWindow.Hide();
+			Instance.MainWindow.Close();
+			Instance._MainWindow = null;
+			Instance._MainPresenter = null;
 			
 		}
 
@@ -68,6 +70,7 @@ namespace Heamatite.View
 
 		public static void ShowMainWindow()
 		{
+			var dummy = Instance.MainWindow;
 			Instance.MainWindow.Show();
 			Instance.ImageWindow.Close();
 			Instance._ImageWindow = null;

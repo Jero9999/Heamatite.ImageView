@@ -57,6 +57,7 @@
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -75,6 +76,9 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Configuration.cs" />
+    <Compile Include="IO\IconCache.cs" />
+    <Compile Include="IO\ShellManager.cs" />
+    <Compile Include="IO\MainWindowDirectoryWrapper.cs" />
     <Compile Include="IO\ImageDirectory.cs" />
     <Compile Include="Presenters\ImagePresenter.cs" />
     <Compile Include="Presenters\MainPresenter.cs" />
