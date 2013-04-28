@@ -43,7 +43,7 @@ namespace Heamatite.IO
 			}
 			else
 			{
-				return FileManager.GetImageSource(fileObject.FullName, 100);
+				return FileManager.GetImageSource(fileObject.FullName, 32);
 			}
 		}
 

@@ -55,7 +55,7 @@ namespace Heamatite.View
 		public Action<object> GotoSelectedItem { get; set; }
 		public Action<int, int, Action<int>> MoveRight { get; set; }
 		public Action<int, Action<int>> MoveLeft { get; set; }
-
+		public Action<string> KeyboardSearch { get; set; }
 		#region CurrentDirectory
 		private void CurrentDirectory_KeyDown(object sender, KeyEventArgs e)
 		{
@@ -94,7 +94,16 @@ namespace Heamatite.View
 				case Key.Right:
 					MoveRight(DirectoryList.SelectedIndex, DirectoryList.Items.Count, newIndex => DirectoryList.SelectedIndex = newIndex);
 					break;
+				default:
+					DoSearch(e.Key);
+					break;
 			}
+		}
+
+		private void DoSearch(Key key)
+		{
+			if (key.ToString().Length > 1) return;
+			KeyboardSearch(key.ToString());
 		}
 
 		private void DirectoryList_SelectionChanged(object sender, SelectionChangedEventArgs e)

@@ -20,6 +20,28 @@ namespace Heamatite.IO
 			_DirectoryObject = directoryObject;
 		}
 
+		System.Windows.Visibility _InProgress = System.Windows.Visibility.Hidden;
+		public System.Windows.Visibility InProgress
+		{
+			get { return _InProgress; }
+			set
+			{
+				if (_InProgress == value) { return; }
+				_InProgress = value;
+				NotifyPropertyChanged();
+			}
+		}
+
+		public void StartLongOperation()
+		{
+			InProgress = System.Windows.Visibility.Visible;
+		}
+
+		public void EndLongOperation()
+		{
+			InProgress = System.Windows.Visibility.Hidden;
+		}
+
 		private object _ContentsLocker = new Object();
 
 		private IList<MainWindowFile> _ContentsInternal = null;
@@ -61,19 +83,56 @@ namespace Heamatite.IO
 			//TODO need to work out how to cancel this if 'this' is disposed / released before the task completes
 			SetContentsTask = Task.Run(() =>
 			{
-				ContentsInternal = _DirectoryObject.GetContents().Select(c => new MainWindowFile(c)).ToList();
+				StartLongOperation();
+				ContentsInternal = _DirectoryObject.GetContents().Select(CreateNewFile).ToList();
 				var firstItem = ContentsInternal.FirstOrDefault();
-				if (firstItem != null) { firstItem.Selected = true; }
+				if (firstItem != null) { SelectedFile = firstItem; }
 				NotifyPropertyChanged("ContentsAsync");
 				NotifyPropertyChanged("Contents");
+				EndLongOperation();
 			});
 
+		}
+
+		private MainWindowFile CreateNewFile(IFileSystemObject fileSystemObject)
+		{
+			MainWindowFile file = new MainWindowFile(fileSystemObject);
+			file.PropertyChanged += (sender, eventArgs) =>
+			{
+				if (eventArgs.PropertyName == "Selected")
+				{
+					_SelectedFile = sender as MainWindowFile;
+					NotifyPropertyChanged("SelectedFile");
+				}
+			};
+			return file;
 		}
 
 		public string FullName
 		{
 			get { return _DirectoryObject.FullName; }
 			set { }
+		}
+
+		private MainWindowFile _SelectedFile;
+		public MainWindowFile SelectedFile
+		{
+			get
+			{
+				return _SelectedFile;
+			}
+			private set
+			{
+				value.Selected = true;
+				_SelectedFile = value;
+				NotifyPropertyChanged("SelectedFile");
+			}
+		}
+
+
+		internal void SetSelected(MainWindowFile itemToSelect)
+		{
+			SelectedFile = itemToSelect;
 		}
 
 		public event PropertyChangedEventHandler PropertyChanged;

@@ -52,8 +52,29 @@ namespace Heamatite.View.Presenters
 			_View.MoveLeft = MoveLeft;
 			_View.MoveToParent = MoveToParent;
 			_View.CurrentDirectoryEnter = CurrentDirectoryEnter;
+			_View.KeyboardSearch = KeyboardSearch;
 
 			DataContext = new MainWindowDirectoryWrapper(_CurrentDirectory);
+
+		}
+
+		private static TimeSpan ResetSearchStringTime = TimeSpan.FromMilliseconds(500);
+		private DateTime LastSearchKeyPressed = DateTime.Now;
+		private string SearchString = string.Empty;
+		private void KeyboardSearch(string key)
+		{
+			if (DateTime.Now - LastSearchKeyPressed > ResetSearchStringTime)
+			{
+				SearchString = string.Empty;
+			}
+			LastSearchKeyPressed = DateTime.Now;
+			char charKey = key[0];
+			SearchString += charKey;
+			var itemToSelect = DataContext.Contents.FirstOrDefault(c => c.SystemObject.Name.StartsWith(SearchString, StringComparison.OrdinalIgnoreCase));
+			if (itemToSelect != null)
+			{
+				DataContext.SetSelected(itemToSelect);
+			}
 
 		}
 
@@ -73,7 +94,7 @@ namespace Heamatite.View.Presenters
 		{
 			var itemToSelect = DataContext.Contents.FirstOrDefault(c => c.SystemObject.Name == fileSystemObject.Name);
 			if (itemToSelect == null) return;
-			itemToSelect.Selected = true;
+			DataContext.SetSelected(itemToSelect);
 		}
 
 		private void GotoSelectedItem(object selectedItem)
