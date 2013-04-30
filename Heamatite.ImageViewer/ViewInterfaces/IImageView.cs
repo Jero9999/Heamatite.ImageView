@@ -26,6 +26,10 @@ namespace Heamatite.ViewInterfaces
 
 		Action FullScreenCommand { get; set; }
 		Action EnterCommand { get; set; }
+
+		void Show();
+
+		void Close();
 	}
 
 }

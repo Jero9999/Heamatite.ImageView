@@ -1,6 +1,8 @@
-﻿using Heamatite.IO;
+﻿using Autofac;
+using Heamatite.IO;
 using Heamatite.IoSystem;
 using Heamatite.View.Presenters;
+using Heamatite.ViewInterfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,27 +11,24 @@ using System.Threading.Tasks;
 
 namespace Heamatite.View
 {
-	public class WindowManager
+	public interface IWindowManager
 	{
-		private static WindowManager _Instance;
-		private static WindowManager Instance
-		{
-			get
-			{
-				if (_Instance == null) { _Instance = new WindowManager(); }
-				return _Instance;
-			}
-		}
+		void ShowImageWindow(IImageDirectory currentDirectory = null, string initialFilename = null);
+		void ShowMainWindow();
+	}
 
-		private ImageView _ImageWindow { get; set; }
-		private ImagePresenter _ImagePresenter { get; set; }
-		private ImageView ImageWindow
+	public class WindowManager: IWindowManager
+	{
+
+		private IImageView _ImageWindow { get; set; }
+		private IImagePresenter _ImagePresenter { get; set; }
+		private IImageView ImageWindow
 		{
 			get
 			{
-				if (_ImageWindow == null) { 
-					_ImageWindow = new ImageView();
-					_ImagePresenter = new ImagePresenter(_ImageWindow, Config, null);
+				if (_ImageWindow == null) {
+					_ImageWindow = IocContainer.Resolve<IImageView>();
+					_ImagePresenter = new ImagePresenter(this, _ImageWindow, Config, null);
 				}
 				return _ImageWindow;
 			}
@@ -37,44 +36,46 @@ namespace Heamatite.View
 
 		private IConfiguration Config;
 		private IIoRepository FileRepository;
-		public WindowManager()
+		private IContainer IocContainer;
+
+		public WindowManager(
+			IConfiguration configuration, 
+			IIoRepository repository)
 		{
-			Config = new Configuration1();
-			FileRepository = new IoRepository();
+			IocContainer = Heamatite.ImageViewer.App.Container;
+			Config = configuration;
+			FileRepository = repository;
 		}
 
-		public static void ShowImageWindow(ImageDirectory currentDirectory = null, string initialFilename = null)
+		public void ShowImageWindow(IImageDirectory currentDirectory = null, string initialFilename = null)
 		{
-			var dummy = Instance.ImageWindow;
-			Instance._ImagePresenter.ResetImage(currentDirectory, initialFilename);
-			Instance.ImageWindow.Show();
-			Instance.MainWindow.Close();
-			Instance._MainWindow = null;
-			Instance._MainPresenter = null;
-			
+			_ImagePresenter.ResetImage(currentDirectory, initialFilename);
+			ImageWindow.Show();
+			MainWindow.Close();
+			_MainWindow = null;
+			_MainPresenter = null;
 		}
 
-		private MainWindow _MainWindow { get; set; }
-		private MainPresenter _MainPresenter { get; set; } 
-		private MainWindow MainWindow
+		private IMainView _MainWindow { get; set; }
+		private IMainPresenter _MainPresenter { get; set; }
+		private IMainView MainWindow
 		{
 			get
 			{
-				if (_MainWindow == null) { 
-					_MainWindow = new MainWindow();
-					_MainPresenter = new MainPresenter(_MainWindow, Config, FileRepository);
+				if (_MainWindow == null) {
+					_MainWindow = IocContainer.Resolve<IMainView>();
+					_MainPresenter = new MainPresenter(this, _MainWindow, Config, FileRepository);
 				}
 				return _MainWindow;
 			}
 		}
 
-		public static void ShowMainWindow()
+		public void ShowMainWindow()
 		{
-			var dummy = Instance.MainWindow;
-			Instance.MainWindow.Show();
-			Instance.ImageWindow.Close();
-			Instance._ImageWindow = null;
-			Instance._ImagePresenter = null;
+			MainWindow.Show();
+			ImageWindow.Close();
+			_ImageWindow = null;
+			_ImagePresenter = null;
 		}
 	}
 }

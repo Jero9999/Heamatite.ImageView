@@ -8,19 +8,26 @@ namespace Heamatite.View.Presenters
 	using System.IO;
 	using System.Threading.Tasks;
 	using System.Linq;
-	public class MainPresenter
+
+	public interface IMainPresenter { }
+	public class MainPresenter: IMainPresenter
 	{
 		private IMainView _View;
-		IConfiguration _Config;
-		IIoRepository _Repo;
-		IDirectoryObject _CurrentDirectory;
+		private IConfiguration _Config;
+		private IIoRepository _Repo;
+		private IDirectoryObject _CurrentDirectory;
+		private IWindowManager _WindowManager;
 
-		public MainPresenter(IMainView view, IConfiguration config, IIoRepository repository)
+		public MainPresenter(
+			IWindowManager windowManager,
+			IMainView view, 
+			IConfiguration config, 
+			IIoRepository repository)
 		{
+			_WindowManager = windowManager;
 			_View = view;
 			_Config = config;
 			_Repo = repository;
-
 
 			string currentDirectory = _Config.StartupDirectory ?? Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
 			_CurrentDirectory = _Repo.GetDirectory(currentDirectory);
@@ -111,7 +118,7 @@ namespace Heamatite.View.Presenters
 			{
 				IFileObject file = selectedSystemObject as IFileObject;
 				IDirectoryObject dir = file.ParentDirectory;
-				WindowManager.ShowImageWindow(new ImageDirectory(dir), file.Name);
+				_WindowManager.ShowImageWindow(new ImageDirectory(dir), file.Name);
 			}
 		}
 

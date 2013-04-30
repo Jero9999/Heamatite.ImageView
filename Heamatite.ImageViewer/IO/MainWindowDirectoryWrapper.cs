@@ -1,4 +1,5 @@
-﻿using Heamatite.IoSystem;
+﻿using Heamatite.Icons;
+using Heamatite.IoSystem;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -196,7 +197,7 @@ namespace Heamatite.IO
 		private ImageSource _CachedIcon = null;
 		private ImageSource GetIcon()
 		{
-			return IconCache.GetIconImage(_FileSystemObject);
+			return IconCache.Instance.GetIconImage(_FileSystemObject);
 		}
 
 		public event PropertyChangedEventHandler PropertyChanged;

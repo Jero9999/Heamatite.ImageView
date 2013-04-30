@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Configuration;
+using SysConfig =System.Configuration.Configuration;
 
 namespace Heamatite
 {
@@ -25,10 +26,10 @@ namespace Heamatite
 		int MainViewWidth { get; set; }
 	}
 
-	class Configuration1 : IConfiguration
+	class Configuration : IConfiguration
 	{
 		WindowSettings ConfigSettings;
-		public Configuration1()
+		public Configuration()
 		{
 			ConfigSettings = GetRoamingConfiguration(out  Config);
 		}
@@ -79,9 +80,9 @@ namespace Heamatite
 			Config.Save(ConfigurationSaveMode.Modified);
 		}
 
-		Configuration Config;
+		SysConfig Config;
 
-		public static WindowSettings GetRoamingConfiguration(out Configuration config)
+		public static WindowSettings GetRoamingConfiguration(out SysConfig config)
 		{
 			// Define the custom section to add to the
 			// configuration file.
@@ -90,7 +91,7 @@ namespace Heamatite
 
 			// Get the roaming configuration 
 			// that applies to the current user.
-			Configuration roamingConfig =
+			SysConfig roamingConfig =
 				ConfigurationManager.OpenExeConfiguration(
 				 ConfigurationUserLevel.PerUserRoamingAndLocal);
 

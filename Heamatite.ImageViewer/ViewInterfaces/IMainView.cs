@@ -25,6 +25,10 @@ namespace Heamatite.ViewInterfaces
 		Action MoveToParent { get; set; }
 		Action CurrentDirectoryEnter { get; set; }
 		Action<string> KeyboardSearch { get; set; }
+
+		void Close();
+
+		void Show();
 	}
 
 }

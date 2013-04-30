@@ -37,7 +37,7 @@
 									</VisualState>
 								</VisualStateGroup>
 							</VisualStateManager.VisualStateGroups>
-							<Border Name="InnerBorder"  CornerRadius="5" Padding="2">
+							<Border Name="InnerBorder"  CornerRadius="5" Padding="5">
 								<Border.Background>
 									<SolidColorBrush x:Name="BorderBrush" 
 																 Opacity="1.0" 
@@ -55,7 +55,7 @@
 		<Grid.RowDefinitions>
 			<RowDefinition Height="50*"/>
 			<RowDefinition Height="500*"/>
-			<RowDefinition Height="30*"/>
+			<RowDefinition Height="30"/>
 		</Grid.RowDefinitions>
 		<DockPanel Margin="2,2,2,2" Grid.Row="0">
 			<Label Content="Current directory:" VerticalAlignment="Center"/>
@@ -82,10 +82,10 @@
 				<DataTemplate >
 					<Grid Name="DirectoryListItem" ToolTip="{Binding Name}">
 						<Grid.RowDefinitions>
-							<RowDefinition Height="*"/>
-							<RowDefinition Height="30"/>
+							<RowDefinition Height="4*" />
+							<RowDefinition MinHeight="30"/>
 						</Grid.RowDefinitions>
-						<Image x:Name="image" Source="{Binding Icon}" Stretch="None" Grid.Row="0" />
+						<Image x:Name="image" Source="{Binding Icon}" Stretch="Uniform" Grid.Row="0" />
 						<TextBlock TextWrapping="Wrap" FontFamily="Tahoma" HorizontalAlignment="Center" FontSize="12" 
 											 Text="{Binding Name}" Grid.Row="1" />
 					</Grid>

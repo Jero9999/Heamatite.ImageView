@@ -13,14 +13,24 @@ using System.IO;
 namespace Heamatite.View.Presenters
 {
 
-	public class ImagePresenter
+	public interface IImagePresenter { 
+		void ResetImage(IImageDirectory currentDirectory, string initialFilename);
+	}
+
+	public class ImagePresenter: IImagePresenter
 	{
 		private IImageView _View;
-		IConfiguration _Config;
+		private IConfiguration _Config;
 		private IImageDirectory _ImageDirectory;
+		private IWindowManager _WindowManager;
 
-		public ImagePresenter(IImageView view, IConfiguration config, IImageDirectory imageDirectory)
+		public ImagePresenter(
+			IWindowManager windowManager,
+			IImageView view, 
+			IConfiguration config, 
+			IImageDirectory imageDirectory)
 		{
+			_WindowManager = windowManager;
 			_View = view;
 			_Config = config;
 			_ImageDirectory = imageDirectory;
@@ -40,7 +50,7 @@ namespace Heamatite.View.Presenters
 			_View.FirstImage = FirstImage;
 			_View.LastImage = LastImage;
 			_View.DataContext = null;
-			_View.EnterCommand = () => WindowManager.ShowMainWindow();
+			_View.EnterCommand = () => _WindowManager.ShowMainWindow();
 			_View.FullScreenCommand = () => _View.IsFullScreen = !_View.IsFullScreen;
 		}
 
@@ -84,12 +94,11 @@ namespace Heamatite.View.Presenters
 			_View.DataContext = imageFile;
 		}
 
-		internal void ResetImage(ImageDirectory currentDirectory, string initialFilename)
+		public void ResetImage(IImageDirectory currentDirectory, string initialFilename)
 		{
 			_ImageDirectory = currentDirectory;
 			_ImageDirectory.SetCurrent(initialFilename);
 			ShowImage(_ImageDirectory.Current());
 		}
-
 	}
 }
