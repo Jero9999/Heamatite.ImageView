@@ -15,6 +15,8 @@ namespace Heamatite.View.Presenters
 
 	public interface IImagePresenter { 
 		void ResetImage(IImageDirectory currentDirectory, string initialFilename);
+
+		IImageView View { get; }
 	}
 
 	public class ImagePresenter: IImagePresenter
@@ -27,13 +29,12 @@ namespace Heamatite.View.Presenters
 		public ImagePresenter(
 			IWindowManager windowManager,
 			IImageView view, 
-			IConfiguration config, 
-			IImageDirectory imageDirectory)
+			IConfiguration config)
 		{
 			_WindowManager = windowManager;
 			_View = view;
 			_Config = config;
-			_ImageDirectory = imageDirectory;
+			_ImageDirectory = null;
 
 			SetupView();
 		}
@@ -53,6 +54,8 @@ namespace Heamatite.View.Presenters
 			_View.EnterCommand = () => _WindowManager.ShowMainWindow();
 			_View.FullScreenCommand = () => _View.IsFullScreen = !_View.IsFullScreen;
 		}
+
+		public IImageView View { get { return _View; } }
 
 		private void ViewFullscreenChanged(object sender, EventArgs e)
 		{

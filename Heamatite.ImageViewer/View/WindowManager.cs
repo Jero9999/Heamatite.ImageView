@@ -27,8 +27,8 @@ namespace Heamatite.View
 			get
 			{
 				if (_ImageWindow == null) {
-					_ImageWindow = IocContainer.Resolve<IImageView>();
-					_ImagePresenter = new ImagePresenter(this, _ImageWindow, Config, null);
+					_ImagePresenter = IocContainer.Resolve<IImagePresenter>();
+					_ImageWindow = _ImagePresenter.View;
 				}
 				return _ImageWindow;
 			}
@@ -49,8 +49,8 @@ namespace Heamatite.View
 
 		public void ShowImageWindow(IImageDirectory currentDirectory = null, string initialFilename = null)
 		{
-			_ImagePresenter.ResetImage(currentDirectory, initialFilename);
 			ImageWindow.Show();
+			_ImagePresenter.ResetImage(currentDirectory, initialFilename);
 			MainWindow.Close();
 			_MainWindow = null;
 			_MainPresenter = null;
@@ -63,8 +63,8 @@ namespace Heamatite.View
 			get
 			{
 				if (_MainWindow == null) {
-					_MainWindow = IocContainer.Resolve<IMainView>();
-					_MainPresenter = new MainPresenter(this, _MainWindow, Config, FileRepository);
+					_MainPresenter = IocContainer.Resolve<IMainPresenter>();
+					_MainWindow = _MainPresenter.View;
 				}
 				return _MainWindow;
 			}

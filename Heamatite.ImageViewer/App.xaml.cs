@@ -23,18 +23,44 @@ namespace Heamatite.ImageViewer
 
 		protected override void OnStartup(StartupEventArgs e)
 		{
+			BuildIocContainer();
+			
+			base.OnStartup(e);
+
+			using (ILifetimeScope scope = Container.BeginLifetimeScope())
+			{
+				var winManager = scope.Resolve<IWindowManager>();
+				winManager.ShowMainWindow();
+			}
+		}
+
+		private static void BuildIocContainer()
+		{
 			var builder = new ContainerBuilder();
 
 			builder.RegisterType<Configuration>().As<IConfiguration>().SingleInstance();
 			builder.RegisterType<WindowManager>().As<IWindowManager>().SingleInstance();
 
+			//presenters
+			builder.Register(c =>
+			{
+				IImageView view = new ImageView();
+				IImagePresenter presenter = new ImagePresenter(c.Resolve<IWindowManager>(), view, c.Resolve<IConfiguration>());
+				return presenter;
+			}).As<IImagePresenter>();
+			builder.Register(c =>
+			{
+				IMainView view = new MainWindow();
+				IMainPresenter presenter = new MainPresenter(c.Resolve<IWindowManager>(), 
+					view, 
+					c.Resolve<IConfiguration>(), 
+					c.Resolve<IIoRepository>());
+				return presenter;
+			}).As<IMainPresenter>();
+
 			//views
 			builder.RegisterType<ImageView>().As<IImageView>();
 			builder.RegisterType<MainWindow>().As<IMainView>();
-
-			//presenters
-			builder.RegisterType<ImagePresenter>().As<IImagePresenter>();
-			builder.RegisterType<MainPresenter>().As<IMainPresenter>();
 
 			builder.RegisterType<MainWindowDirectoryWrapper>();
 			builder.RegisterType<MainWindowFile>();
@@ -52,12 +78,6 @@ namespace Heamatite.ImageViewer
 			builder.RegisterAssemblyTypes(ioSystemAssembly);
 
 			Container = builder.Build();
-			base.OnStartup(e);
-			using (ILifetimeScope scope = Container.BeginLifetimeScope())
-			{
-				var winManager = scope.Resolve<IWindowManager>();
-				winManager.ShowMainWindow();
-			}
 		}
 	}
 }

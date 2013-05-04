@@ -9,8 +9,12 @@ namespace Heamatite.View.Presenters
 	using System.Threading.Tasks;
 	using System.Linq;
 
-	public interface IMainPresenter { }
-	public class MainPresenter: IMainPresenter
+	public interface IMainPresenter
+	{
+		IMainView View { get; }
+	}
+
+	public class MainPresenter : IMainPresenter
 	{
 		private IMainView _View;
 		private IConfiguration _Config;
@@ -20,8 +24,8 @@ namespace Heamatite.View.Presenters
 
 		public MainPresenter(
 			IWindowManager windowManager,
-			IMainView view, 
-			IConfiguration config, 
+			IMainView view,
+			IConfiguration config,
 			IIoRepository repository)
 		{
 			_WindowManager = windowManager;
@@ -33,6 +37,8 @@ namespace Heamatite.View.Presenters
 			_CurrentDirectory = _Repo.GetDirectory(currentDirectory);
 			SetupView(currentDirectory);
 		}
+
+		public IMainView View { get { return _View; } }
 
 		//need this so that code running a thread other than the UI thread has access to the window's DataContext.
 		MainWindowDirectoryWrapper _DataContext;
