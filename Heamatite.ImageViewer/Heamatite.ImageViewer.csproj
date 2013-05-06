@@ -86,6 +86,7 @@
     <Compile Include="Icons\FileToIconConverter.cs" />
     <Compile Include="Icons\SysImageList.cs" />
     <Compile Include="Icons\IconCache.cs" />
+    <Compile Include="IO\MainWindowFile.cs" />
     <Compile Include="IO\ShellManager.cs" />
     <Compile Include="IO\MainWindowDirectoryWrapper.cs" />
     <Compile Include="IO\ImageDirectory.cs" />

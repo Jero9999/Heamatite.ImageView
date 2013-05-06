@@ -8,6 +8,7 @@ namespace Heamatite.View.Presenters
 	using System.IO;
 	using System.Threading.Tasks;
 	using System.Linq;
+using Heamatite.Icons;
 
 	public interface IMainPresenter
 	{
@@ -21,18 +22,20 @@ namespace Heamatite.View.Presenters
 		private IIoRepository _Repo;
 		private IDirectoryObject _CurrentDirectory;
 		private IWindowManager _WindowManager;
+		private IconCacheQueue _IconCacheQueue;
 
 		public MainPresenter(
 			IWindowManager windowManager,
 			IMainView view,
 			IConfiguration config,
-			IIoRepository repository)
+			IIoRepository repository,
+			IconCacheQueue iconCacheQueue)
 		{
 			_WindowManager = windowManager;
 			_View = view;
 			_Config = config;
 			_Repo = repository;
-
+			_IconCacheQueue = iconCacheQueue;
 			string currentDirectory = _Config.StartupDirectory ?? Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
 			_CurrentDirectory = _Repo.GetDirectory(currentDirectory);
 			SetupView(currentDirectory);
@@ -67,7 +70,7 @@ namespace Heamatite.View.Presenters
 			_View.CurrentDirectoryEnter = CurrentDirectoryEnter;
 			_View.KeyboardSearch = KeyboardSearch;
 
-			DataContext = new MainWindowDirectoryWrapper(_CurrentDirectory);
+			DataContext = new MainWindowDirectoryWrapper(_CurrentDirectory, _View.Dispatcher, _IconCacheQueue);
 
 		}
 
@@ -99,7 +102,8 @@ namespace Heamatite.View.Presenters
 
 		private void UpdateFileList()
 		{
-			DataContext = new MainWindowDirectoryWrapper(_CurrentDirectory);
+			_IconCacheQueue.ClearQueue();
+			DataContext = new MainWindowDirectoryWrapper(_CurrentDirectory, _View.Dispatcher, _IconCacheQueue);
 			_Config.StartupDirectory = _CurrentDirectory.FullName;
 		}
 
@@ -147,7 +151,7 @@ namespace Heamatite.View.Presenters
 				var prevDirectory = _CurrentDirectory;
 				_CurrentDirectory = currentDirectory;
 				UpdateFileList();
-				SetSelectedItemInList(prevDirectory);
+				//SetSelectedItemInList(prevDirectory);
 			}
 		}
 

@@ -48,6 +48,9 @@ namespace Heamatite.IO
 		private static string[] _ImageFileExtensions = new string[]
 		{
 			".jpg",
+			".jpeg",
+			".tif",
+			".bmp",
 			".gif",
 			".png"
 		};

@@ -2,6 +2,7 @@
 using Heamatite.IoSystem;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -10,15 +11,36 @@ using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 
 namespace Heamatite.IO
 {
-	class MainWindowDirectoryWrapper : INotifyPropertyChanged
+	class MainWindowDirectoryWrapper : INotifyPropertyChanged, IDisposable
 	{
 		IDirectoryObject _DirectoryObject;
-		public MainWindowDirectoryWrapper(IDirectoryObject directoryObject)
+		private Dispatcher UiDispatcher;
+		private IconCacheQueue IconCache;
+
+		public MainWindowDirectoryWrapper(IDirectoryObject directoryObject, Dispatcher uiDispatcher, IconCacheQueue iconCacheQueue)
 		{
+			IconCache = iconCacheQueue;
 			_DirectoryObject = directoryObject;
+			UiDispatcher = uiDispatcher;
+		}
+
+		~MainWindowDirectoryWrapper()
+		{
+			Dispose();
+		}
+
+		private bool IsDisposed = false;
+		public void Dispose()
+		{
+			if (!IsDisposed)
+			{
+				IsDisposed = true;
+				IconCache.ClearQueue();
+			}
 		}
 
 		System.Windows.Visibility _InProgress = System.Windows.Visibility.Hidden;
@@ -45,8 +67,8 @@ namespace Heamatite.IO
 
 		private object _ContentsLocker = new Object();
 
-		private IList<MainWindowFile> _ContentsInternal = null;
-		private IList<MainWindowFile> ContentsInternal
+		private ObservableCollection<MainWindowFile> _ContentsInternal = null;
+		private ObservableCollection<MainWindowFile> ContentsInternal
 		{
 			get
 			{
@@ -58,7 +80,7 @@ namespace Heamatite.IO
 			}
 		}
 
-		public IList<MainWindowFile> ContentsAsync
+		public ObservableCollection<MainWindowFile> ContentsAsync
 		{
 			get
 			{
@@ -80,24 +102,40 @@ namespace Heamatite.IO
 		private Task SetContentsTask = null;
 		private void SetContents()
 		{
-			ContentsInternal = new List<MainWindowFile>();
+			ContentsInternal = new ObservableCollection<MainWindowFile>();
 			//TODO need to work out how to cancel this if 'this' is disposed / released before the task completes
 			SetContentsTask = Task.Run(() =>
 			{
 				StartLongOperation();
-				ContentsInternal = _DirectoryObject.GetContents().Select(CreateNewFile).ToList();
-				var firstItem = ContentsInternal.FirstOrDefault();
-				if (firstItem != null) { SelectedFile = firstItem; }
-				NotifyPropertyChanged("ContentsAsync");
-				NotifyPropertyChanged("Contents");
-				EndLongOperation();
+				try
+				{
+					IEnumerable<IFileSystemObject> directoryContents = _DirectoryObject.GetContentsEnumerable();
+					var aLot = directoryContents.Take(10);
+
+					while (aLot.Count() > 0)
+					{
+						UiDispatcher.Invoke(() =>
+							{
+								aLot.Select(CreateNewFile).ToList().ForEach(c => _ContentsInternal.Add(c));
+							}
+						);
+						//var firstItem = ContentsInternal.FirstOrDefault();
+						//if (firstItem != null) { SelectedFile = firstItem; }
+						directoryContents = directoryContents.Skip(10);
+						aLot = directoryContents.Take(10);
+					}
+				}
+				finally
+				{
+					EndLongOperation();
+				}
 			});
 
 		}
 
 		private MainWindowFile CreateNewFile(IFileSystemObject fileSystemObject)
 		{
-			MainWindowFile file = new MainWindowFile(fileSystemObject);
+			MainWindowFile file = new MainWindowFile(fileSystemObject, IconCache);
 			file.PropertyChanged += (sender, eventArgs) =>
 			{
 				if (eventArgs.PropertyName == "Selected")
@@ -149,67 +187,4 @@ namespace Heamatite.IO
 		}
 	}
 
-	class MainWindowFile : INotifyPropertyChanged
-	{
-
-		public MainWindowFile(IFileSystemObject fileSystemObject)
-		{
-			_FileSystemObject = fileSystemObject;
-		}
-
-		IFileSystemObject _FileSystemObject;
-		public IFileSystemObject SystemObject { get { return _FileSystemObject; } }
-
-		public string Name
-		{
-			get { return _FileSystemObject.Name; }
-		}
-
-		public ImageSource Icon
-		{
-			get
-			{
-				if (_CachedIcon == null)
-				{
-					Task.Run(() =>
-					{
-						_CachedIcon = GetIcon();
-						NotifyPropertyChanged("Icon");
-					});
-				}
-				return _CachedIcon;
-			}
-		}
-
-		private bool _Selected;
-		public bool Selected
-		{
-			get
-			{
-				return _Selected;
-			}
-			set
-			{
-				_Selected = value;
-				NotifyPropertyChanged("Selected");
-			}
-		}
-		private ImageSource _CachedIcon = null;
-		private ImageSource GetIcon()
-		{
-			return IconCache.Instance.GetIconImage(_FileSystemObject);
-		}
-
-		public event PropertyChangedEventHandler PropertyChanged;
-
-		protected void NotifyPropertyChanged([CallerMemberName] string propertyName = null)
-		{
-			if (propertyName == null) return;
-
-			if (PropertyChanged != null)
-			{
-				PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-			}
-		}
-	}
 }

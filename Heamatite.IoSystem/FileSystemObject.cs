@@ -49,6 +49,12 @@ namespace Heamatite.IoSystem
 
 		private DirectoryInfo DirectoryInfo { get { return FileSystemInfo as DirectoryInfo; } }
 
+
+		public IEnumerable<IFileSystemObject> GetContentsEnumerable()
+		{
+			return _Repository.GetContentsEnumerable(this.FullName);
+		}
+
 		public IList<IFileSystemObject> GetContents()
 		{
 			return _Repository.GetContents(this.FullName).ToList();

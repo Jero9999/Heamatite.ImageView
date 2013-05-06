@@ -45,6 +45,11 @@ namespace Heamatite.IoSystem.Zip
 		{
 			_ZipFile = null;
 		}
+
+		public IEnumerable<IFileSystemObject> GetContentsEnumerable()
+		{
+			throw new NotImplementedException();
+		}
 	}
 
 }

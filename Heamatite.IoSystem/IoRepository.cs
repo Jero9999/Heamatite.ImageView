@@ -9,27 +9,41 @@ namespace Heamatite.IoSystem
 {
 	public class IoRepository : IIoRepository
 	{
-		public IList<IFileSystemObject> GetContents(string path)
+		public IEnumerable<IFileSystemObject> GetContentsEnumerable(string path)
 		{
 			DirectoryInfo pathDir = new DirectoryInfo(path);
 			if (!pathDir.Exists) { throw new ArgumentException(path + " does not exist"); }
 
-			return pathDir.GetFileSystemInfos().Select(c => Create(c)).ToList();
+			return pathDir.EnumerateFileSystemInfos()
+				.OrderBy(c =>
+				{
+					if (c.Attributes.HasFlag(FileAttributes.Directory)) { return 0; }
+					else if (c.Attributes.HasFlag(FileAttributes.Archive)) { return 1; }
+					else { return 2; }
+				})
+				.Select(c => Create(c));
+		}
+
+		public IList<IFileSystemObject> GetContents(string path)
+		{
+			return GetContentsEnumerable(path).ToList();
 		}
 
 		private IFileSystemObject Create(FileSystemInfo systemObject)
 		{
 			if (systemObject.Attributes.HasFlag(FileAttributes.Directory))
 			{
-				return (IFileSystemObject)new DirectoryObject(systemObject as DirectoryInfo, this);
+				return new DirectoryObject(systemObject as DirectoryInfo, this);
 			}
 			else
 			{
-				if (Ionic.Zip.ZipFile.IsZipFile(systemObject.FullName))
+				string fileExtension = Path.GetExtension(systemObject.Name);
+				if (string.Equals(fileExtension, ".zip", StringComparison.OrdinalIgnoreCase) &&
+					Ionic.Zip.ZipFile.IsZipFile(systemObject.FullName))
 				{
-					return (IFileSystemObject)new Zip.ZipFileObject(systemObject as FileInfo, this);
+					return new Zip.ZipFileObject(systemObject as FileInfo, this);
 				}
-				return (IFileSystemObject)new FileObject(systemObject as FileInfo, this);
+				return new FileObject(systemObject as FileInfo, this);
 			}
 		}
 

@@ -53,7 +53,7 @@
 	</Window.Resources>
 	<Grid>
 		<Grid.RowDefinitions>
-			<RowDefinition Height="50*"/>
+			<RowDefinition Height="auto"/>
 			<RowDefinition Height="500*"/>
 			<RowDefinition Height="30"/>
 		</Grid.RowDefinitions>

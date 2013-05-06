@@ -62,6 +62,11 @@ namespace Heamatite.IoSystem.Zip
 			_ZipFile.Dispose();
 			_ZipFile = null;
 		}
+
+		public IEnumerable<IFileSystemObject> GetContentsEnumerable()
+		{
+			throw new NotImplementedException();
+		}
 	}
 
 	//public class ZipDirectory : Directory, IDisposable

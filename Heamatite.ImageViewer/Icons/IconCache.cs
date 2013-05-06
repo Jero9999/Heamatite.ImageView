@@ -1,4 +1,5 @@
-﻿using Heamatite.IoSystem;
+﻿#define xDISPLAY_DEBUG 
+using Heamatite.IoSystem;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,42 +40,59 @@ namespace Heamatite.Icons
 
 		public ImageSource GetIconImage(IFileSystemObject fileSystemObject)
 		{
-			System.Diagnostics.Debug.WriteLine("Cache get icon image");
-
 			if (_cache[fileSystemObject.FullName] != null)
 			{
+#if DISPLAY_DEBUG
 				System.Diagnostics.Debug.WriteLine("Cache HIT: " + fileSystemObject.FullName);
+#endif
 				return _cache[fileSystemObject.FullName] as ImageSource;
 			}
-			ImageSource bitmap = null;
-			if (fileSystemObject is IDirectoryObject)
-			{
-				bitmap = _Converter.GetImage(fileSystemObject.FullName);
-			}
-			else if (ImageDirectory.IsImage(fileSystemObject as IFileObject))
-			{
-				bitmap = GenerateBitmap(fileSystemObject as IFileObject);
-			}
-			else
-			{
-				bitmap = _Converter.GetImage(fileSystemObject.FullName);
-			}
 
-			System.Diagnostics.Debug.WriteLine("Cache add: " + fileSystemObject.FullName);
-			_cache.Add(new CacheItem(fileSystemObject.FullName, bitmap), 
-				new CacheItemPolicy() { SlidingExpiration = TimeSpan.FromMinutes(10) });
+			ImageSource bitmap = ReadFromDisk(fileSystemObject);
 
-			bitmap.Freeze();
+			AddToCache(fileSystemObject, bitmap);
+
 			return bitmap;
 		}
 
-		private static BitmapImage GenerateBitmap(IFileObject fileObject)
+		private void AddToCache(IFileSystemObject fileSystemObject, ImageSource bitmap)
 		{
-			using (var stream = fileObject.OpenRead())
-			{
-				return GetBitmap(stream);
-			}
+#if DISPLAY_DEBUG
+			System.Diagnostics.Debug.WriteLine("Cache add: " + fileSystemObject.FullName);
+#endif
+			_cache.Add(new CacheItem(fileSystemObject.FullName, bitmap),
+				new CacheItemPolicy() { SlidingExpiration = TimeSpan.FromMinutes(10) });
 		}
+
+		static object locker = new object();
+		private ImageSource ReadFromDisk(IFileSystemObject fileSystemObject)
+		{
+			ImageSource bitmap = null;
+			//lock (locker)
+			{
+#if DISPLAY_DEBUG
+				System.Diagnostics.Debug.WriteLine("Cache read from disk " + fileSystemObject.Name);
+#endif
+				if (fileSystemObject is IDirectoryObject)
+				{
+					bitmap = _Converter.GetImage(fileSystemObject.FullName);
+				}
+				else if (ImageDirectory.IsImage(fileSystemObject as IFileObject))
+				{
+					using (var stream = (fileSystemObject as IFileObject).OpenRead())
+					{
+						bitmap = GetBitmap(stream);
+					}
+				}
+				else
+				{
+					bitmap = _Converter.GetImage(fileSystemObject.FullName);
+				}
+				bitmap.Freeze();
+			}
+			return bitmap;
+		}
+
 		private static BitmapImage GetBitmap(System.IO.Stream fileSteam)
 		{
 			BitmapImage myBitmapImage = new BitmapImage();
@@ -88,6 +106,75 @@ namespace Heamatite.Icons
 			myBitmapImage.EndInit();
 			myBitmapImage.Freeze();
 			return myBitmapImage;
+		}
+
+
+	}
+
+	public class IconCacheQueue
+	{
+		Queue<ActionQueueItem> ActionQueue = new Queue<ActionQueueItem>(1000);
+
+		static Object lockObject = new Object();
+		bool _QueueIsRunning = false;
+		bool QueueIsRunning
+		{
+			get { lock (lockObject) { return _QueueIsRunning; } }
+			set { lock (lockObject) { _QueueIsRunning = value; } }
+		}
+
+		public void ClearQueue()
+		{
+			lock (lockObject)
+			{
+				ActionQueue.Clear();
+			}
+		}
+
+		private void RunQueue()
+		{
+			if (QueueIsRunning) { return; }
+			QueueIsRunning = true;
+
+			Task.Run(() =>
+			{
+				while (ActionQueue.Count > 0)
+				{
+					ActionQueueItem item;
+					lock (lockObject)
+					{
+						item = ActionQueue.Dequeue();
+					}
+					ProcessQueueItem(item);
+				}
+				QueueIsRunning = false;
+			});
+		}
+
+		public void GetIconImageAsync(IFileSystemObject fileSystemObject, Action<ImageSource> returnAction)
+		{
+			lock (lockObject)
+			{
+				ActionQueue.Enqueue(new ActionQueueItem()
+				{
+					FileSystemObject = fileSystemObject,
+					ReturnAction = returnAction
+				}
+				);
+			}
+			RunQueue();
+		}
+
+		private void ProcessQueueItem(ActionQueueItem item)
+		{
+			ImageSource image = IconCache.Instance.GetIconImage(item.FileSystemObject);
+			item.ReturnAction(image);
+		}
+
+		struct ActionQueueItem
+		{
+			public IFileSystemObject FileSystemObject;
+			public Action<ImageSource> ReturnAction;
 		}
 	}
 

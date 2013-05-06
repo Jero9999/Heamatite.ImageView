@@ -14,6 +14,7 @@ namespace Heamatite.IoSystem
 
 	public interface IDirectoryObject : IFileSystemObject
 	{
+		IEnumerable<IFileSystemObject> GetContentsEnumerable();
 		IList<IFileSystemObject> GetContents();
 		IList<IDirectoryObject> GetDirectories();
 		IList<IFileObject> GetFiles();

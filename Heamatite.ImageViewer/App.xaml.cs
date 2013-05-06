@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using Heamatite.Icons;
 using Heamatite.IO;
 using Heamatite.IoSystem;
 using Heamatite.View;
@@ -54,7 +55,9 @@ namespace Heamatite.ImageViewer
 				IMainPresenter presenter = new MainPresenter(c.Resolve<IWindowManager>(), 
 					view, 
 					c.Resolve<IConfiguration>(), 
-					c.Resolve<IIoRepository>());
+					c.Resolve<IIoRepository>(),
+					c.Resolve<IconCacheQueue>()
+					);
 				return presenter;
 			}).As<IMainPresenter>();
 
@@ -64,6 +67,7 @@ namespace Heamatite.ImageViewer
 
 			builder.RegisterType<MainWindowDirectoryWrapper>();
 			builder.RegisterType<MainWindowFile>();
+			builder.RegisterType<IconCacheQueue>().SingleInstance();
 
 			builder.RegisterType<ImageFile>().As<IImageFile>();
 			builder.RegisterType<ImageDirectory>().As<IImageDirectory>();

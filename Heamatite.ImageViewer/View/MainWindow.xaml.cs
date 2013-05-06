@@ -32,7 +32,7 @@ namespace Heamatite.View
 		public MainWindow()
 		{
 			InitializeComponent();
-
+			
 			DirectoryList.Focus();
 		}
 

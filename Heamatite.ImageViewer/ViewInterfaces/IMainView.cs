@@ -29,6 +29,8 @@ namespace Heamatite.ViewInterfaces
 		void Close();
 
 		void Show();
+
+		System.Windows.Threading.Dispatcher Dispatcher { get; }
 	}
 
 }
